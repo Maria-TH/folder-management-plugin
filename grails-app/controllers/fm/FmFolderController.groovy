@@ -850,20 +850,26 @@ class FmFolderController {
                 AmTagItem amTagItem = obj
                 if (amTagItem.viewInChildGrid) {
                     if (amTagItem.tagItemType == 'FIXED' && bioDataObject.hasProperty(amTagItem.tagItemAttr)) {
-                        def bioDataDisplayValue = null
+                        def bioDataDisplayValue = ""
                         def bioDataPropertyValue = bioDataObject[amTagItem.tagItemAttr]
                         if (amTagItem.tagItemSubtype == 'PICKLIST' || amTagItem.tagItemSubtype == 'MULTIPICKLIST') {
                             if (bioDataPropertyValue) {
-                                def cc = ConceptCode.findByUniqueId(bioDataPropertyValue)
-                                if (cc) {
-                                    bioDataDisplayValue = cc.codeName
-                                } else {
-                                    bioDataDisplayValue = ""
+                                String[] splitData = bioDataPropertyValue.split("\\|");
+                                for (eachSplit in splitData) {
+                                    def cc = ConceptCode.findByUniqueId(eachSplit)
+                                    if (cc) {
+                                    	if(bioDataDisplayValue) {
+	                                    	 bioDataDisplayValue = bioDataDisplayValue + ", " + cc.codeName
+                                    	} else {
+    	                                	 bioDataDisplayValue = cc.codeName
+                                    	}
+                                    } else {
+                                        bioDataDisplayValue = ""
+                                    }
                                 }
                             } else {
                                 bioDataDisplayValue = ""
                             }
-
                         } else if (amTagItem.tagItemSubtype == 'FREETEXT') {
                             bioDataDisplayValue = createTitleString(amTagItem, bioDataPropertyValue, folderObject, subFoldersAccessLevelMap[folderObject] != 'LOCKED')
                         } else if (amTagItem.tagItemSubtype == 'FREETEXTAREA') {
